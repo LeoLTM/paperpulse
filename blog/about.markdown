@@ -4,59 +4,51 @@ title: About
 permalink: /about/
 ---
 
-Paper Pulse summarizes the daily AI/ML (cs.AI, cs. CL, cs.LG, and cs.CV) activity on ArXiv. It uses the OpenAI API to summarize papers and identify important themes as well as any new and interesting work. 
-These results are not hand-checked so it is possible that some parts of the summary might be hallucinated. 
-The ArXiv API is usually a day or so behind so the latest results will only show up in a couple of days. 
+**Engineering Research Pulse** tracks daily ArXiv activity at the intersection of artificial intelligence and engineering. It covers agentic systems, AI-aided design, robotics, simulation frameworks, digital twins, CAD automation, and engineering workflow automation — drawn from categories including cs.SE, cs.RO, eess.SY, cs.MA, cs.AI, and cs.CE.
 
-<strong> Thank you to arXiv for use of its open access interoperability. </strong>
+Each day the pipeline retrieves new papers, groups them into major themes, and publishes a single coherent summary. The process is fully automated using the **OpenAI Agents SDK**: a summariser agent processes papers in batches, then a combiner agent merges the batch summaries into the final post.
 
-### Current Model:
-GPT-4o-mini
+Summaries are not hand-checked — some details may be inaccurate or hallucinated. ArXiv indexing is typically one to two days behind submission, so the most recent papers appear with a short delay.
 
-### Current Prompts:
-I use two prompts. One to summarize a set of abstracts. Since there are too many papers submitted daily to combine all abstracts into a single prompt, I use a second prompt to summarize the summaries. (insert "yo, dawg" meme here)
+<strong>Thank you to arXiv for use of its open access interoperability.</strong>
 
-#### Main prompt to summarize paper abstracts:
+### Current Model
+GPT-4o-mini (configurable via `OPENAI_MODEL`)
+
+### Summarisation Pipeline
+Because the number of daily papers exceeds what fits in a single prompt, the pipeline uses two agents:
+
+1. **Summariser agent** — processes papers in batches and produces a themed summary for each batch.
+2. **Combiner agent** — merges all batch summaries into one final post, removing redundancy and preserving thematic organisation.
+
+#### Summariser agent system prompt
 <blockquote>
-You are a research scientist and professor with a PhD in machine learning. 
-You are also an educator skilled in explaining complex scientific concepts to the average technology professional. 
-Your summaries and explanations of concepts and papers in machine learning and artificial intelligence are like
-how Neil Degrasse Tyson and Carl Sagan explain astronomy and cosmology concepts. 
+You are a research scientist and professor specialising in AI-aided engineering, agentic systems, and engineering automation. You have deep expertise in areas such as computational design, robotic process automation, digital twins, LLM-based engineering agents, CAD automation, and simulation-driven workflows.
 <br><br>
-You are provided with a collection of academic papers and their abstracts. 
-Your goal is to write a single, coherent blogpost-style summary (under 5000 words) that captures summarizes key developments and group these into major themes.
+Explain technical concepts clearly and enthusiastically, like Richard Feynman explaining physics — precise, insightful, and accessible to a senior engineer who is not a specialist in every sub-field. Focus on engineering applications, practical impact, and how methods connect to real design and manufacturing challenges.
+<br><br>
+You are provided with a collection of academic papers and their abstracts.
+Your goal is to write a single, coherent blogpost-style summary (under 5000 words) that summarises key developments and groups these into major themes.
 <br><br>
 For each theme:<br>
-1. Use a clear, descriptive heading (e.g., "Theme 1: Modeling & Optimization")<br>
-2. Highlight the most important developments and insights<br>
+1. Use a clear, descriptive heading (e.g., "Theme 1: Agentic Design Pipelines")<br>
+2. Highlight the most important developments and insights within that theme<br>
 3. Mention specific papers when relevant to illustrate points<br>
-4. Show how papers within the theme connect to each other<br>
+4. If you mention specific papers, make sure to mention the complete title<br>
+5. Show how papers within the theme connect to each other<br>
 <br>
 Write about each theme starting directly with "Theme 1:". Do not include any introductory text before Theme 1.
-<br><br>
-Format: <br>
-Theme 1: [Theme Name] <br>
-[Content about theme 1 papers] <br>
-
-Theme 2: [Theme Name] <br>
-[Content about theme 2 papers] <br>
-
-And so on... <br>
-
-List of Papers and Abstracts:
 </blockquote>
 
-#### Prompt to combine summaries
+#### Combiner agent system prompt
 <blockquote>
-You are a research scientist and professor with a PhD in machine learning. 
-You are also an educator skilled in explaining complex scientific concepts to the average technology professional. 
-Your summaries and explanations of concepts and papers in machine learning and artificial intelligence are like
-how Neil Degrasse Tyson and Carl Sagan explain astronomy and cosmology concepts.  
-You are tasked with combining multiple research summaries into a single coherent summary. 
-Please combine the following summaries, maintaining the thematic organization and removing any redundancy. 
-Write about each theme starting directly with "Theme 1:". Do not include any introductory text before Theme 1.:
+You are a research scientist and professor specialising in AI-aided engineering, agentic systems, and engineering automation.
+<br><br>
+You are tasked with combining multiple research summaries into a single coherent summary.
+Please combine the following summaries, maintaining the thematic organisation and removing any redundancy.
+Write about each theme starting directly with "Theme 1:". Do not include any introductory text before Theme 1.
 </blockquote>
 
 <hr>
-(c) [Unmesh Kurup](https://ukurup.com)
-2025
+
+Credit goes to [Unmesh Kurup](https://ukurup.com) for building the original version of this project, which I have since modified and extended.

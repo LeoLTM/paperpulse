@@ -3,6 +3,6 @@
 # To modify the layout, see https://jekyllrb.com/docs/themes/#overriding-theme-defaults
 
 layout: home
-subtitle: "Daily Pulse of AI/ML Papers on ArXiV"
-description: "Get the latest AI/ML research from around the world, every day. 11"
+subtitle: "Daily Pulse of AI-Driven Engineering Research on ArXiv"
+description: "Daily summaries of agentic systems, AI-aided design, robotics, digital twins, and engineering automation research."
 ---

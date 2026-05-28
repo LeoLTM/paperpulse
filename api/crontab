@@ -1,0 +1,5 @@
+# Paperpulse cron schedule
+# Runs the ArXiv summariser once per day at 06:00 UTC.
+# Adjust the time as needed (format: minute hour day month weekday).
+# Logs are written to stdout/stderr so Docker captures them automatically.
+0 6 * * * cd /app && python -m api.main

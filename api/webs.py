@@ -6,14 +6,20 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-def create_blogpost(summary, num_papers):
+def create_blogpost(summary, num_papers, config=None):
     """
     Creates a markdown file with specified naming convention and writes content.
-    
+
     Args:
-        content (str): The content to write to the markdown file
-        date_obj (datetime): DateTime object used for file naming
+        summary (str): The summary content to write
+        num_papers (int): Number of papers included in the summary
+        config (dict): Paperpulse config loaded from config.yaml (optional)
     """
+    if config is None:
+        config = {}
+    blog_cfg = config.get("blog", {})
+    post_title = blog_cfg.get("post_title", "Daily Research Summary")
+
     todays_date = datetime.now().strftime('%Y-%m-%d')
     # Format the filename
     filename = f"{todays_date}-daily-summary.markdown"
@@ -21,7 +27,7 @@ def create_blogpost(summary, num_papers):
     # Create the header with the current date
     header = f"""---
 layout: post
-title: ArXiV ML/AI/CV papers summary
+title: {post_title}
 date: {todays_date}
 categories: summary
 num_papers: {num_papers}

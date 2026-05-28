@@ -1,5 +1,4 @@
 import os
-import openai
 import pickle
 import re
 import logging
@@ -18,9 +17,9 @@ from api.utils import (
     add_markdown_links
     )
 from api.arxiv_client import ArxivClient
-from api.agent import Agent
+from api.agent import PaperpulseAgent
 from api.file_handler import FileHandler
-from api.settings import ARXIV_SEARCH_QUERY, ARXIV_SORT_BY, ARXIV_SORT_ORDER
+from api.settings import load_config, build_arxiv_query, ARXIV_SORT_BY, ARXIV_SORT_ORDER
 
 from api.webs import create_blogpost
 
@@ -38,9 +37,14 @@ def main():
     dev_env=os.getenv("PROJECT_ENV")
     logger.info(dev_env)
 
-    # initalize
-    arxiv_client = ArxivClient(ARXIV_SEARCH_QUERY, ARXIV_SORT_BY, ARXIV_SORT_ORDER)
-    llm_agent = Agent(os.getenv("OPENAI_API_KEY"))
+    # load configuration
+    config = load_config()
+    search_query = build_arxiv_query(config)
+    logger.info(f'ArXiv query: {search_query}')
+
+    # initialise
+    arxiv_client = ArxivClient(search_query, ARXIV_SORT_BY, ARXIV_SORT_ORDER)
+    llm_agent = PaperpulseAgent(config)
     file_handler = FileHandler(os.getenv("PROJECT_DIR"))
     papers = None
 
@@ -71,8 +75,8 @@ def main():
     # link papers mentioned in the summary to Arxiv
     summary_linked = add_markdown_links(summary, papers)
 
-    # write the smummary to a web page based on the day when the papers were retrieved
-    create_blogpost(summary_linked, len(papers))
+    # write the summary to a web page based on the day when the papers were retrieved
+    create_blogpost(summary_linked, len(papers), config)
 
 if __name__ == "__main__":
     main()

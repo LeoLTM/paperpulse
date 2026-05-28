@@ -11,8 +11,8 @@ from datetime import datetime, date, timedelta, timezone
 logger = logging.getLogger(__name__)
 
 class ArxivClient:
-    def __init__(self, 
-                 search_query='cat:cs.LG+OR+cat:cs.AI+OR+cat:cs.CL+OR+cat:cs.CV',
+    def __init__(self,
+                 search_query='cat:cs.AI',
                  sort_by='lastUpdatedDate',
                  sort_order='descending'):
         

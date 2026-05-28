@@ -10,10 +10,17 @@ services:
       - MIXPANEL_TOKEN=${MIXPANEL_TOKEN}
     command: jekyll serve --livereload
 
+  # Persistent API server (dev) ─────────────────────────────────────────────
+  # Starts alongside the blog on `docker compose up`.
+  # Exposes port 8000 for the manual trigger button in the blog UI.
+  # Paper results are cached under ./data so repeated triggers don't
+  # re-fetch ArXiv (PROJECT_ENV=dev activates the cache in main.py).
   api:
     build:
       context: .
       dockerfile: api/Dockerfile
+    ports:
+      - "8000:8000"
     volumes:
       - ./blog/_posts:/app/blog/_posts  # write posts into the Jekyll tree
       - ./data:/app/data                 # pickle cache for dev mode
@@ -24,7 +31,26 @@ services:
       - PROJECT_DIR=/app
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o-mini}
-    # In dev, run once on demand: docker compose run --rm api
+      - MANUAL_TRIGGERS_ALLOWED=true
+    command: uvicorn api.server:app --host 0.0.0.0 --port 8000 --reload
+
+  # One-shot runner ──────────────────────────────────────────────────────────
+  # Use when you want to invoke the pipeline directly without the HTTP server:
+  #   docker compose run --rm api-run
+  api-run:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    volumes:
+      - ./blog/_posts:/app/blog/_posts
+      - ./data:/app/data
+      - ./.env:/app/.env:ro
+      - ./config.yaml:/app/config.yaml:ro
+    environment:
+      - PROJECT_ENV=${PROJECT_ENV:-dev}
+      - PROJECT_DIR=/app
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o-mini}
     profiles:
       - run
 

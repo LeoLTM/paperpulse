@@ -18,6 +18,58 @@
     font-size: 0.9em !important;
 }
 
+/* Dev trigger panel -------------------------------------------------------- */
+.dev-trigger {
+    margin-top: 2.5rem;
+    padding: 0.85rem 1.1rem;
+    border: 1px dashed #c8cdd4;
+    border-radius: 6px;
+    background: #f9fafb;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.9rem;
+    flex-wrap: wrap;
+}
+
+.dev-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #8a909a;
+    margin: 0;
+}
+
+.trigger-btn {
+    padding: 0.35rem 0.9rem;
+    font-size: 0.85rem;
+    font-family: inherit;
+    color: #fff;
+    background: #1756a9;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.trigger-btn:hover:not(:disabled) {
+    background: #104587;
+}
+
+.trigger-btn:disabled {
+    background: #7fa8d3;
+    cursor: not-allowed;
+}
+
+.trigger-status {
+    font-size: 0.82rem;
+    color: #555;
+}
+
+.trigger-status.status-ok  { color: #2e7d32; }
+.trigger-status.status-err { color: #c62828; }
+.trigger-status.status-warn { color: #e65100; }
+
 .page-heading {
     font-size: 2.5em;
     margin-bottom: 0.5em;

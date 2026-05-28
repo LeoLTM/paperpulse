@@ -1,6 +1,8 @@
 python-dotenv>=1.0.0
 PyYAML>=6.0
 openai-agents
+fastapi>=0.111.0
+uvicorn[standard]>=0.29.0
 # PDF tools (not needed for the daily cron flow)
 pdfplumber
 PyMuPDF

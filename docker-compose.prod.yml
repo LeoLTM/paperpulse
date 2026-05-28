@@ -7,10 +7,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.jekyll
-    # Override the default CMD to disable the on-disk cache.
-    # In Proxmox LXC containers the jekyll user (UID 1000) cannot write into
-    # the bind-mounted host directory due to user-namespace ID remapping, which
-    # causes Permission denied when Jekyll tries to create .jekyll-cache.
+    # Run as root so Jekyll can write _site and .jekyll-cache into the
+    # bind-mounted host directory.  In Proxmox LXC with user-namespace
+    # remapping, root inside the container maps to an unprivileged subUID on
+    # the host, so this does not grant elevated host access.
+    user: root
     command: ["jekyll", "serve", "--host", "0.0.0.0", "--force_polling", "--disable-disk-cache"]
     ports:
       - "4000:4000"

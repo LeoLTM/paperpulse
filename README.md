@@ -48,17 +48,39 @@ The `OPENAI_MODEL` environment variable controls which model is used (default: `
 
 Intended for local iteration. The Jekyll blog is served with `--livereload` so changes to `blog/` are reflected immediately.
 
-The API container is defined under the `run` profile so it only starts on demand:
+`docker compose up` starts both the blog and a persistent API server:
+
+| Service | Port | Purpose |
+|---|---|---|
+| `blog` | 4000 | Jekyll site with live-reload |
+| `api` | 8000 | FastAPI server — handles manual pipeline triggers |
 
 ```bash
-# Start the blog (live-reload at localhost:4000)
+# First start, or after changing Python code / requirements
 docker compose up --build
 
-# Run the summariser once
-docker compose run --rm api
+# Subsequent starts (config/template changes only)
+docker compose up
 ```
 
-In `dev` mode (`PROJECT_ENV=dev`), retrieved papers are cached to a pickle file (`data/papers-<date>.pkl`). Re-running within the same day skips the ArXiv API call and uses the cache, which speeds up iteration.
+> **Always use `--build`** after editing Python source files, `api/requirements.txt`, or the `Dockerfile`. Without it, Docker reuses the cached image and your changes won't be picked up.
+
+#### Manual trigger (dev only)
+
+The API server runs with `MANUAL_TRIGGERS_ALLOWED=true`, which activates a **▶ Run Update Now** button at the bottom of the blog home page (`http://localhost:4000`). Clicking it fires the full ArXiv → LLM → blog post pipeline in the background and polls for completion, showing live status feedback in the UI. Jekyll's live-reload then picks up the new post automatically.
+
+The trigger is intentionally dev-only:
+- The button is rendered only when `JEKYLL_ENV=development`
+- The `/trigger` route is **not registered at all** when `MANUAL_TRIGGERS_ALLOWED` is unset or `false` — it returns 404 and cannot be reached via Postman or any other client
+- Production compose does not set this variable
+
+To invoke the pipeline without the UI:
+```bash
+# One-shot run (no HTTP server)
+docker compose run --rm api-run
+```
+
+In `dev` mode (`PROJECT_ENV=dev`), retrieved papers are cached to a pickle file (`data/papers-<date>.pkl`). Re-running within the same day skips the ArXiv API call and reuses the cache, so only the LLM call is made on subsequent triggers.
 
 The `.env` file is bind-mounted read-only into the container so `python-dotenv` can load it automatically.
 
@@ -70,7 +92,7 @@ Intended for a server deployment (e.g. an LXC container behind Nginx Proxy Manag
 |---|---|---|
 | Jekyll image | Pre-built `jekyll/jekyll:4` | Custom image built from `Dockerfile.jekyll` |
 | Jekyll command | `jekyll serve --livereload` | Built as a static site; served by Jekyll's production server |
-| API invocation | Manual (`docker compose run`) | Automatic — `supercronic` runs the crontab on schedule |
+| API invocation | HTTP server + manual trigger button | Automatic — `supercronic` runs the crontab on schedule |
 | Cron schedule | — | Daily at 06:00 UTC (`api/crontab`) |
 | `.env` mount | Yes (read-only) | No — env vars are passed directly in the compose file |
 | Restart policy | — | `unless-stopped` on both services |
@@ -93,6 +115,7 @@ docker-compose.yml       # Dev stack
 docker-compose.prod.yml  # Production stack
 api/
   main.py                # Orchestrator — wires ArXiv → agent → blog post
+  server.py              # FastAPI app — exposes /trigger when MANUAL_TRIGGERS_ALLOWED=true
   arxiv_client.py        # ArXiv API queries
   agent.py               # OpenAI Agents SDK: summariser + combiner agents
   file_handler.py        # Paper pickle cache (dev mode)

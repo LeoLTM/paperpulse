@@ -10,4 +10,21 @@ services:
       - MIXPANEL_TOKEN=${MIXPANEL_TOKEN}
     command: jekyll serve --livereload
 
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    volumes:
+      - ./blog/_posts:/app/blog/_posts  # write posts into the Jekyll tree
+      - ./data:/app/data                 # pickle cache for dev mode
+      - ./.env:/app/.env:ro
+      - ./config.yaml:/app/config.yaml:ro
+    environment:
+      - PROJECT_ENV=${PROJECT_ENV:-dev}
+      - PROJECT_DIR=/app
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o-mini}
+    # In dev, run once on demand: docker compose run --rm api
+    profiles:
+      - run
 

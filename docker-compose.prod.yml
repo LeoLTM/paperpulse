@@ -12,7 +12,11 @@ services:
     # remapping, root inside the container maps to an unprivileged subUID on
     # the host, so this does not grant elevated host access.
     user: root
-    command: ["jekyll", "serve", "--host", "0.0.0.0", "--force_polling", "--disable-disk-cache"]
+    # Jekyll reads source from the bind-mounted /srv/jekyll but writes the
+    # built site to /tmp/_site (container-local, always writable).  This
+    # sidesteps the LXC user-namespace UID remapping that makes the host
+    # bind-mount unwritable for any UID inside the container.
+    command: ["jekyll", "serve", "--host", "0.0.0.0", "--force_polling", "--disable-disk-cache", "--destination", "/tmp/_site"]
     ports:
       - "4000:4000"
     volumes:

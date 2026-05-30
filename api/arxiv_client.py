@@ -96,6 +96,20 @@ class ArxivClient:
                         
                         # If we get here, we have data, so break the retry loop
                         break
+                except urllib.error.HTTPError as e:
+                    retry_count += 1
+                    if retry_count == max_retries:
+                        print(f"Failed to retrieve data after {max_retries} attempts: {str(e)}")
+                        return papers
+                    print(f"Error on attempt {retry_count}: {str(e)}")
+                    if e.code == 429:
+                        # Exponential backoff for rate limiting: 60s, 120s, 240s, 480s
+                        wait_time = 60 * (2 ** (retry_count - 1))
+                        print(f"Rate limited (429). Waiting {wait_time}s before retry {retry_count + 1}...")
+                        time.sleep(wait_time)
+                    else:
+                        time.sleep(5)
+                    continue
                 except Exception as e:
                     retry_count += 1
                     if retry_count == max_retries:
